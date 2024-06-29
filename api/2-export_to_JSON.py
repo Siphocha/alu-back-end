@@ -1,25 +1,26 @@
 #!/usr/bin/python3
-"""Script gets the TODO list and exports to JSON."""
+"""
+Python script that fetches and analyzes TODO list progress from an API.
+"""
 import json
 import requests
 from sys import argv
-
 if __name__ == "__main__":
-    #Fetch employee information from the API.
+    # Step 1: Fetch employee information from the API.
     user_id = argv[1]
-    request_employee = requests.get(f'https://jsonplaceholder.typicode.com/users/{user_id}')
-
-    #Turn info into text
+    request_employee = requests.get(
+        f'https://jsonplaceholder.typicode.com/users/{user_id}'
+    )
     employee = json.loads(request_employee.text)
     employee_name = employee.get("name")
     USERNAME = employee.get("username")
-
-    #Get employees TODO list from API
-    request_todos = requests.get(f'https://jsonplaceholder.typicode.com/users/{user_id}/todos')
+    # Step 2: Fetch the employee's TODO list from the API.
+    request_todos = requests.get(
+        f'https://jsonplaceholder.typicode.com/users/{user_id}/todos'
+    )
     tasks = {}
     employee_todos = json.loads(request_todos.text)
-
-    #Processing TODO list data
+    # Step 3: Analyze and process the TODO list data.
     for dictionary in employee_todos:
         TASK_TITLE = dictionary.get("title")
         TASK_COMPLETED_STATUS = dictionary.get("completed")
@@ -32,7 +33,6 @@ if __name__ == "__main__":
             "username": USERNAME
         })
     json_to_dump = {user_id: task_list}
-
-    #Export the analyzed data to a JSON file.
+    # Step 4: Export the analyzed data to a JSON file.
     with open(f'{user_id}.json', mode='w') as file:
         json.dump(json_to_dump, file)

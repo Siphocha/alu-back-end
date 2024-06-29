@@ -1,36 +1,45 @@
 #!/usr/bin/python3
-"""Script for fetching and showing Employee progress using his employee ID"""
+"""
+    This employee ID, gives out the information about TODO list employee.
+"""
+
 
 import requests
 import sys
 
-"""1. get employee todo progress from API for the employee ID"""
-def get_employee_progress(employee_id):
-    url = "https://jsonplaceholder.typicode.com"
+base_url = 'https://jsonplaceholder.typicode.com/'
 
-    usr = requests.get(f"{url}/users/{employee_id}").json()
-    todo = requests.get(f"{url}/users/{employee_id}/todos").json()
 
-    completed = [i for i in todo if i["completed"]]
-    total = len(todo)
-    done = len(completed)
-
-    print(f"Employee {usr['name']} is done with ({done}/{total}) ")
-    for task in completed:
-        print(f"\t {task['title']}")
-
-if __name__=="__main__":
-    if len(sys.argv) != 2:
-        print("Usage: 0-gather_data_from_an_API.py <employee_id>")
-        sys.exit(1)
-
+def do_request():
+    '''Performs request'''
+    if len(sys.argv) < 2:
+        return print('USAGE:', __file__, '<employee id>')
+    eid = sys.argv[1]
     try:
-        """gets user through integer specifiying in the function-runner under the function runner"""
-        employee_id = int(sys.argv[1])
-        get_employee_progress(employee_id)
+        _eid = int(sys.argv[1])
+    except ValueError:
+        return print('Employee id must be an integer')
 
-    except  ValueError:
-        print("Error not employee id use an integer")
-        sys.exit(1)
+    response = requests.get(base_url + 'users/' + eid)
+    if response.status_code == 404:
+        return print('User id not found')
+    elif response.status_code != 200:
+        return print('Error: status_code:', response.status_code)
+    user = response.json()
+
+    response = requests.get(base_url + 'todos/')
+    if response.status_code != 200:
+        return print('Error: status_code:', response.status_code)
+    todos = response.json()
+
+    user_todos = [todo for todo in todos
+                  if todo.get('userId') == user.get('id')]
+    completed = [todo for todo in user_todos if todo.get('completed')]
+    print('Employee', user.get('name'),
+          'is done with tasks({}/{}):'.
+          format(len(completed), len(user_todos)))
+    [print('\t', todo.get('title')) for todo in completed]
 
 
+if __name__ == '__main__':
+    do_request()
