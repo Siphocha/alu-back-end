@@ -28,7 +28,7 @@ if __name__ == "__main__":
         sys.exit(1)
 
     try:
-        """gets user through integer specifiying in the function-runner under the function runner"""
+        """gets user thru integer specifiying under function-runner"""
         employee_id = int(sys.argv[1])
         get_employee_progress(employee_id)
 
